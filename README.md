@@ -4,3 +4,7 @@ Article Medium : https://ai.plainenglish.io/how-to-make-an-email-response-genera
 
 ## But
 Le progamme affiche une interface web dans laquelle on peut copier un mail, paramétrer les caractéristique qui vont influencer la réponse qui sera généré par l'api d'OpenAI
+
+## Documentation
+
+La documentation se trouve dans la page de wiki: https://github.com/MrKaaaa/chatGPyThon/wiki
