@@ -24,3 +24,19 @@ Une fois nodejs et yarn installé, il est nécessaire de se rendre dans le dossi
 En suite notre application elle sera disponible à l'adresse 'localhost:3000'
 
 ### Backend:
+
+1) Ouvrir un terminal sur l’emplacement du dossier WebApp.
+
+2) Lancer la commande pip install -r requirements.txt
+
+3) Ouvrir dossier WebApp qui se trouve à la racine du projet, avec un éditeur de texte.
+
+4) Ajouter la clé API à la l. 16 
+
+5) Lancez le script open-api.py
+
+L'applocation sera alors disponible sur 'http://127.0.0.1:5000'
+
+## Utilisation
+
+Une fois les 2 applications démarés, en utilisant votre browser, vous pouvez vous rendre sur 'localhost:3000' et tester l'interface graphique + flask endpoint
