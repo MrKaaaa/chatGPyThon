@@ -23,6 +23,12 @@ export default function Prompt() {
 	const [x, setX] = useState();
 	const [y, setY] = useState();
 
+	const [xFirstArea, setXFirstArea] = useState();
+	const [yFirstArea, setYFirstArea] = useState();
+
+	const [wFirstArea, setWFirstArea] = useState();
+	const [hFirstArea, setHFirstArea] = useState();
+
 	const [w, setW] = useState();
 	const [h, setH] = useState();
 
@@ -34,30 +40,44 @@ export default function Prompt() {
 
 	const [error, setError] = useState(false);
 
+	const [errorSubmit, setErrorSubmit] = useState(false);
+
+	const firstTxtAreaRef = useRef();
 	const secondTxtAreaRef = useRef();
 
 	const baseUrl = "http://127.0.0.1:5000";
 
 
+	/**
+	 * This function is an event handler that updates the state mailContent with the value from the event target.
+	 * @param event The event object.
+	 */
 	const handleChange = event => {
-		setMailContent(event.target.value);
+		setMailContent(event.target.value)
 	};
 
+	/**
+	 * This function is an event handler that logs the value from the event target and updates the state context with that value.
+	 * @param event The event object.
+	 */
 	const handleContext = event => {
-		console.log(event.target.value);
 		const elValue = event.target.value;
 		setContext(elValue)
 	};
 
 	const [items, setItems] = useState([]);
 	const incrCounter = () => setCount(c => c + 1);
-	console.log(count);
 
+	/**
+	 * This function adds the current context value to the fnContexts state if it's not empty. 
+	 * It also updates the items state with a new TextField.
+	 */
 	const addToFnContexts = () => {
 		const elValue = context;
-		console.log(elValue);
+
 		if(elValue.length > 0){
 			setError(false);
+			setErrorSubmit(false);
 			setFnContexts((cont) => {
 				return [...cont, elValue];
 			});
@@ -82,16 +102,36 @@ export default function Prompt() {
 		
 	};
 
+	let timer;
+	/**
+	 * This function is an asynchronous handler that sets the finalContent state with 
+	 * a formatted string and sets hasContent state to true.
+	 */
 	const handleClick = async () => {
-		backdropIsOpen();
+		if(mailContent.length < 1 ){
+			setErrorSubmit(true);
+		}else if(fnContexts.length < 1){setErrorSubmit(true);} 
+		else{
+			getPosistionOfRefElTwo(secondTxtAreaRef);
+			getPosistionOfRefElOne(firstTxtAreaRef);
 
-		const contArrayStr = fnContexts.toString();
+			getDimensionOfRefElTwo(secondTxtAreaRef);
+			getPosistionOfRefElOne(firstTxtAreaRef);
 
-		const fn = `XYW2${ton}XYW2${style}XYW2 WXZYF45${contArrayStr} ::\n${mailContent}`;
-		setFinalContent(fn);
-		setHasContent(true);
+			backdropIsOpen();
+
+			const contArrayStr = fnContexts.toString();
+			const fn = `XYW2${ton}XYW2${style}XYW2 WXZYF45${contArrayStr} ::\n${mailContent}`;
+			setFinalContent(fn);
+			setHasContent(true);
+		}
+		
 	};
 
+	/**
+	 * This function sends a POST request to the flask app URL using axios and 
+	 * sets the apiResponse state with the response data.
+	 */
 	const requestGpt = async () => {
 		const fnUrl = new URL(`/${finalContent}`, baseUrl);
 		const href = fnUrl.href.replaceAll('?', 'WXZZ');
@@ -100,9 +140,15 @@ export default function Prompt() {
 		setApiResponse(response.data);
 	};
 
+	/**
+	 * Set the visibility of the backdrop.
+	 */
 	const backdropIsOpen = () => {
-		getPosistionOfRefEl(secondTxtAreaRef);
-		getDimensionOfRefEl(secondTxtAreaRef);
+		getPosistionOfRefElTwo(secondTxtAreaRef);
+		getPosistionOfRefElOne(firstTxtAreaRef);
+
+		getDimensionOfRefElTwo(secondTxtAreaRef);
+		getPosistionOfRefElOne(firstTxtAreaRef);
 		setOpen(!open);
 	};
 
@@ -110,7 +156,12 @@ export default function Prompt() {
 		requestGpt().then(() => backdropIsOpen());
 		setHasContent(false);
 	}
-	const getPosistionOfRefEl = (value) => {
+
+	/**
+	 * Get the position of a react element.
+	 * @param value The Ref of the element.
+	 */
+	const getPosistionOfRefElTwo = (value) => {
 		const xVal = value?.current?.offsetLeft;
 		setX(xVal);
 
@@ -118,7 +169,23 @@ export default function Prompt() {
 		setY(yVal);
 	};
 
-	const getDimensionOfRefEl = (value) => {
+	/**
+	 * Get the position of a react element.
+	 * @param value The Ref of the element.
+	 */
+	const getPosistionOfRefElOne = (value) => {
+		const xVal = value?.current?.offsetLeft;
+		setXFirstArea(xVal);
+
+		const yVal = value?.current?.offsetTop;
+		setYFirstArea(yVal);
+	};
+
+	/**
+	 * Get the dimensions of a react element.
+	 * @param value The Ref of the element.
+	 */
+	const getDimensionOfRefElTwo = (value) => {
 		const elmRect = value.current.getBoundingClientRect();
 
 		const hVal = elmRect.height;
@@ -128,9 +195,26 @@ export default function Prompt() {
 		setW(wVal);
 	};
 
+	/**
+	 * Get the dimensions of a react element.
+	 * @param value The Ref of the element.
+	 */
+	const getDimensionOfRefElOne = (value) => {
+		const elmRect = value.current.getBoundingClientRect();
+
+		const hVal = elmRect.height;
+		setHFirstArea(hVal);
+
+		const wVal = elmRect.width;
+		setWFirstArea(wVal);
+	};
+	
 	const onWindowResize = () => {
-		getPosistionOfRefEl(secondTxtAreaRef);
-		getDimensionOfRefEl(secondTxtAreaRef);
+		getPosistionOfRefElTwo(secondTxtAreaRef);
+		getPosistionOfRefElOne(firstTxtAreaRef);
+
+		getDimensionOfRefElTwo(secondTxtAreaRef);
+		getDimensionOfRefElOne(firstTxtAreaRef)
 	};
 
 	const addInputField = () => {
@@ -155,10 +239,17 @@ export default function Prompt() {
 		if(fnContexts.length > 0)
 			setFnContexts(fnContexts.filter(i => i !== elId));
 	}
+
+	useEffect(() => {
+		const timer = setTimeout(() => handleClick(), 1000);
+	}, [mailContent]);
 	
 	useEffect(() => {
-		getPosistionOfRefEl(secondTxtAreaRef);
-		getDimensionOfRefEl(secondTxtAreaRef);
+		getPosistionOfRefElTwo(secondTxtAreaRef);
+		getPosistionOfRefElOne(firstTxtAreaRef);
+
+		getDimensionOfRefElTwo(secondTxtAreaRef);
+		getDimensionOfRefElOne(firstTxtAreaRef);
 	}, []);
 
 	useEffect(() => {
@@ -169,7 +260,7 @@ export default function Prompt() {
 	window.addEventListener('scroll', onWindowResize);
 
 	return (
-		<Box display={"flex"} flexDirection={"column"}>
+		<Box display={"flex"} flexDirection={"column"} marginTop={'30px'}>
 			<Box
 				display="flex"
 				flexDirection="row"
@@ -221,6 +312,7 @@ export default function Prompt() {
 						</Select>
 					</Box>
 					<Textarea
+						ref={firstTxtAreaRef}
 						disabled={false}
 						minRows={10}
 						placeholder="Contenu du mail..."
@@ -230,8 +322,10 @@ export default function Prompt() {
 							minWidth: '500px',
 						}}
 						onChange={handleChange}
-						value={mailContent}
 					/>
+					<Backdrop sx={{ position: 'absolute', color: 'fff', left: xFirstArea, top: yFirstArea, width: wFirstArea, height: hFirstArea, borderRadius: '8px' }} open={open}>
+						<CircularProgress color="inherit" />
+					</Backdrop>
 					<Box
 						display="flex"
 						flexDirection="row"
@@ -251,6 +345,7 @@ export default function Prompt() {
 				</Box>
 				<Box>
 					<Textarea
+						id='txt-2'
 						ref={secondTxtAreaRef}
 						disabled={false}
 						minRows={10}
@@ -268,6 +363,9 @@ export default function Prompt() {
 					</Backdrop>
 				</Box>
 			</Box>
+			<Box visibility={errorSubmit ? 'visible' : 'hidden'} sx={{marginTop: errorSubmit ? '20px' : '0', height: errorSubmit ? '48px' : '0'}}>
+				<Alert severity="error"><b>Considère ajouter du contexte pour avoir une réponse plus aligné avec le contexte de ton mail</b></Alert>
+			</Box>
 			<Box
 				display="flex"
 				flexDirection="row"
@@ -276,7 +374,7 @@ export default function Prompt() {
 				width="100%"
 				gap={16}
 			>
-				<Box height={"450px"} width={"500px"} marginTop={"50px"} justifyContent={"center"}>
+				<Box height={"450px"} width={"500px"} marginTop={"20px"} justifyContent={"center"}>
 					<h2>Contexte à ajouter</h2>
 					<Stack spacing={2}
 						display="flex"
