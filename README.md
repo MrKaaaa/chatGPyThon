@@ -14,7 +14,7 @@ La documentation se trouve dans la page de wiki: https://github.com/MrKaaaa/chat
 ### Frontend:
 
 il est nécessaire d'avoir node installé, et yarn.
-Pour installer Node, visiter : www.nodejs.com
+Pour installer Node, visiter : www.nodejs.org
 Pour installer Yarn, une fois installé Node, lancer la commande: npm i -g yarn
 
 Une fois nodejs et yarn installé, il est nécessaire de se rendre dans le dossier '/frontend' et lancer les commandes suivantes:
