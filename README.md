@@ -18,8 +18,8 @@ Pour installer Node, visiter : www.nodejs.com
 Pour installer Yarn, une fois installé Node, lancer la commande: npm i -g yarn
 
 Une fois nodejs et yarn installé, il est nécessaire de se rendre dans le dossier '/frontend' et lancer les commandes suivantes:
-> yarn install
-> yarn start
+- yarn install
+- yarn start
 En suite notre application elle sera disponible à l'adresse 'localhost:3000'
 
 ### Backend:
