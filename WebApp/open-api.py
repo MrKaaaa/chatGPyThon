@@ -1,11 +1,10 @@
 from threading import Thread
 
 import openai
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify
 from flask_swagger_ui import get_swaggerui_blueprint
-from flask_cors import CORS, cross_origin
-import requests
-import tiktoken as tiktoken
+from flask_cors import CORS
+
 
 app = Flask(__name__)
 CORS(app)
@@ -16,7 +15,9 @@ style = ""
 context = ""
 openai.api_key = ""
 
-preprompt = """Ecris moi une réponse pour ce mail, en adoptant un ton [0] et un style d'écriture [1]. 
+preprompt = """Agis comme si tu étais ChatGpyThon, en tant que tel tu dois être en mesure de répondre aux mails que 
+                je te fournirai, en respectant de manière stricte les consignes à suivre. 
+                Ecris moi une réponse pour ce mail, en adoptant un ton [0] et un style d'écriture [1]. 
                 Pour répondre a ce mail prends en considération les contextes suivants \n[2]: \n\n"""
 
 prompt = ""
@@ -31,11 +32,21 @@ responses = []
 msg_queue = []
 
 def addParaPrePrompt(ton, style, context):
+    """
+    This function adds parameters to the global preprompt variable by replacing placeholders with the provided values.
+    :param ton: The value to replace the [0] placeholder in preprompt.
+    :param style: The value to replace the [1] placeholder in preprompt.
+    :param context: The value to replace the [2] placeholder in preprompt.
+    """
     global preprompt
     preprompt = preprompt.replace('[0]', ton).replace('[1]', style).replace('[2]', context)
 
 
 def user_input(input):
+    """
+    This function processes the user input and performs operations based on the input format.
+    :param input: The user input string.
+    """
     ton = input.split('XYW2')[1]
     style = input.split('XYW2')[2].split('::')[0]
     context = input.split('WXZYF45')[1].split('::')[0].replace(',', '\n')
@@ -48,7 +59,13 @@ def user_input(input):
 
 @app.route('/<input>', methods=['GET', 'POST'])
 def index(input):
+    """
+    This function is the route handler for the '/<input>' endpoint in the Flask application.
+    :param input: The input received from the endpoint.
+    :return: A JSON response that contains the generated answer from OpenAI API.
+    """
 
+    # Thread creation/initialisation
     user_input_thread = Thread(target=user_input, args=(input,))
     user_input_thread.start()
     user_input_thread.join()
@@ -61,6 +78,9 @@ def index(input):
 
 
 def get_completion_openai():
+    """
+    This function generates a completion using the OpenAI ChatCompletion API.
+    """
     response = openai.ChatCompletion.create(
         model=model,
         messages=msg_queue,
