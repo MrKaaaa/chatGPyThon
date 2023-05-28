@@ -1,5 +1,5 @@
 import { ListItem, Option, Select, Stack, Textarea } from '@mui/joy';
-import { Backdrop, Box, CircularProgress, StepContext, TextField } from '@mui/material';
+import { Alert, Backdrop, Box, CircularProgress, TextField } from '@mui/material';
 import Button from '@mui/joy/Button';
 import FixedSizeList from '@mui/material/List'; 
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
@@ -28,94 +28,66 @@ export default function Prompt() {
 
 	const [count, setCount] = useState(1);
 
-	//const initContexts = {id: string, value: ""}
+	const [context, setContext] = useState('');
 
-	const [contexts, setContexts] = useState([{id: "", value: ""}]);
-	//const contexts = [{id: "", value: ""}];
+	const [fnContexts, setFnContexts] = useState([]);
 
-	const [items, setItems] = useState([<TextField id={'in-'+count}  placeholder="Ajoutez du contexte..." value={contexts} sx={{ color: "neutral", variant: "solid", minHeight: "100px", width: "100%", justifyContent: "center" }} />]);
+	const [error, setError] = useState(false);
 
 	const secondTxtAreaRef = useRef();
 
 	const baseUrl = "http://127.0.0.1:5000";
 
+
 	const handleChange = event => {
 		setMailContent(event.target.value);
 	};
 
-	let val = false;
-
-	const checkIfExists = (value, event) => {
-		value.id === event.target.id ? val = true : val = false;
-	};
-
 	const handleContext = event => {
 		console.log(event.target.value);
-		// if(b.length < 1){
-			
-		const nextList = [...contexts];
-		const b = nextList.filter((obj, index, self) => obj.value !== event.target.id).indexOf;
-		//const b = nextList.find((obj) => obj.id === event.target.id);
-		const n = event.target.id;
-		if(b.length > 1){
-			const nextList = [...contexts];
-			const cont = nextList.find(
-				a => a.id === event.target.id
-			);
-			cont.value = event.target.value;
-
-			//setContexts(nextList);
-		}else {
-			
-			var newContexts = contexts.slice();
-			newContexts.push({id: event.target.id, value: event.target.value});
-			setContexts( cont => {
-				cont.forEach(e => checkIfExists(e, event));
-				if(val){
-					const c = cont.find(
-						a => a.id === event.target.id
-					);
-					c.value = event.target.value;
-
-					setContexts(cont);
-
-				}else{
-					return [...cont, 
-						{
-							value: event.target.value, 
-							id: event.target.id
-						}]
-				}
-			})
-		}
-
-		// }
-		//else{
-			//setContexts( cont => [...cont, {value: event.target.value, id: event.target.id}]);
-		// contexts.map(obj => {
-		// 	if(obj.id === event.target.id)
-		// 	{
-		// 		console.log('passé iciiiiidsfdsfdf')
-		// 		setContexts([{...obj, id: event.target.id,value: event.target.value }])
-		// 		return {...obj, value: event.target.value as string};
-		// 	}
-		// 	setContexts([{...obj,id: event.target.id , value: event.target.value }])
-		// 	return {...obj, id: event.target.id as string, value: event.target.value as string};
-		// },[]);
-
-		//setContexts(newState)
-		//}
+		const elValue = event.target.value;
+		setContext(elValue)
 	};
 
-	// const getContexts = () => {
-	// 	const str = "";
-	// 	contexts.reduce
-	// } 
+	const [items, setItems] = useState([]);
+	const incrCounter = () => setCount(c => c + 1);
+	console.log(count);
+
+	const addToFnContexts = () => {
+		const elValue = context;
+		console.log(elValue);
+		if(elValue.length > 0){
+			setError(false);
+			setFnContexts((cont) => {
+				return [...cont, elValue];
+			});
+	
+			setItems([
+				<TextField id={'in-'+ (count + 1)} 
+				key={'key-in-' + (count + 1)}
+				placeholder="Ajoutez du contexte..." 
+				sx={{ color: "neutral",
+						variant: "solid",
+						minHeight: "100px", 
+						width: "100%", 
+						justifyContent: "center" }}
+				onChange={handleContext}
+				/>
+			]);
+			setContext('');
+		}else{
+			setContext('');
+			setError(true);
+		}
+		
+	};
 
 	const handleClick = async () => {
 		backdropIsOpen();
 
-		const fn = `XYW2${ton}XYW2${style}XYW2 ::\n${mailContent}`;
+		const contArrayStr = fnContexts.toString();
+
+		const fn = `XYW2${ton}XYW2${style}XYW2 WXZYF45${contArrayStr} ::\n${mailContent}`;
 		setFinalContent(fn);
 		setHasContent(true);
 	};
@@ -123,6 +95,7 @@ export default function Prompt() {
 	const requestGpt = async () => {
 		const fnUrl = new URL(`/${finalContent}`, baseUrl);
 		const href = fnUrl.href.replaceAll('?', 'WXZZ');
+
 		const response = await axios.post(href);
 		setApiResponse(response.data);
 	};
@@ -138,10 +111,10 @@ export default function Prompt() {
 		setHasContent(false);
 	}
 	const getPosistionOfRefEl = (value) => {
-		const xVal = value.current.offsetLeft;
+		const xVal = value?.current?.offsetLeft;
 		setX(xVal);
 
-		const yVal = value.current.offsetTop;
+		const yVal = value?.current?.offsetTop;
 		setY(yVal);
 	};
 
@@ -156,37 +129,41 @@ export default function Prompt() {
 	};
 
 	const onWindowResize = () => {
-		console.log("OKKKKKK!!!!!!!");
 		getPosistionOfRefEl(secondTxtAreaRef);
 		getDimensionOfRefEl(secondTxtAreaRef);
 	};
 
 	const addInputField = () => {
-		setCount(c => c + 1);
-		setItems([...items, 
+		if(items.length < 1){
+			setItems([...items, 
 				<TextField id={'in-'+ (count + 1)} 
 							key={'key-in-' + (count + 1)}
 							placeholder="Ajoutez du contexte..." 
 							sx={{ color: "neutral",
 									variant: "solid",
 									minHeight: "100px", 
-									width: "100%", 
+									width: "80%", 
 									justifyContent: "center" }}
-							onBlur={handleContext}
+							onChange={handleContext}
 							/>
-		]);
+			]);
+		}
 	};
 
 	const deleteInputField = (input) => {
-		const elId = input.props.id;
-		if(items.length > 1)
-			setItems(items.filter(i => i.props.id !== elId));
+		const elId = input;
+		if(fnContexts.length > 0)
+			setFnContexts(fnContexts.filter(i => i !== elId));
 	}
 	
 	useEffect(() => {
 		getPosistionOfRefEl(secondTxtAreaRef);
-		getDimensionOfRefEl(secondTxtAreaRef)
+		getDimensionOfRefEl(secondTxtAreaRef);
 	}, []);
+
+	useEffect(() => {
+		incrCounter()
+	}, [items]);
 	
 	window.addEventListener('resize', onWindowResize);
 	window.addEventListener('scroll', onWindowResize);
@@ -300,14 +277,64 @@ export default function Prompt() {
 				gap={16}
 			>
 				<Box height={"450px"} width={"500px"} marginTop={"50px"} justifyContent={"center"}>
+					<h2>Contexte à ajouter</h2>
+					<Stack spacing={2}
+						display="flex"
+						alignItems="center"
+						justifyContent="stretch"
+						sx={{overflowY: 'auto', flexFlow: 'column nowrap'}}>
+						<Button
+							variant="soft"
+							color="neutral"
+							onClick={addInputField}
+							sx={{ minHeight: '50px', width: '100%' }}
+						>
+							<Add color='action'/>
+						</Button>
+						<FixedSizeList sx={{height: 390, width: '100%'}}>
+						{items.map((item, index) => (
+							<ListItem
+								sx={{
+									display: "flex",
+									flexDirection: "row",
+									alignItems: "center",
+									justifyItems: "stretch",
+									width: "100%"
+								}}
+							>
+								<Box sx={{width: '100%'}}>
+									<Box sx={{display: 'flex'}}>
+										{item}
+										<Box sx={{width: '20%', display:'flex', alignItems:'center', justifyContent: 'center'}}>
+											<Button
+												variant="outlined"
+												color="neutral"
+												onClick={() => addToFnContexts()}
+												sx={{ width: '90%', marginLeft: '10px', height:'56px', justifyContent: 'center' }}
+											>
+												<KeyboardArrowRight sx={{color: '#506077'}}/>
+											</Button>
+										</Box>
+									</Box>
+									<Box visibility={error ? 'visible' : 'hidden'}>
+										<Alert severity="error">The field is empty !</Alert>
+									</Box>
+								</Box>
+							</ListItem>
+						))}
+						</FixedSizeList>
+					</Stack>
+				</Box>
+				<Box height={"450px"} width={"500px"} marginTop={"50px"} justifyContent={"center"}>
+					<h2>Contexte ajouté</h2>
 					<Stack spacing={2}
 						display="flex"
 						alignItems="center"
 						justifyContent="stretch"
 						sx={{overflowY: 'auto', flexFlow: 'column nowrap'}}>
 						<FixedSizeList sx={{height: 390, width: '100%'}}>
-						{items.map(item => (
-							<ListItem key={item.key}
+						{fnContexts.map((item, index) => (
+							<ListItem 
 								sx={{
 									display: "flex",
 									flexDirection: "row",
@@ -317,14 +344,6 @@ export default function Prompt() {
 								}}
 							>
 								{item}
-								<Button
-									variant="soft"
-									color="neutral"
-									onClick={addInputField}
-									sx={{ minHeight: '60px', marginLeft: '10px' }}
-								>
-									<Add color='action'/>
-								</Button>
 								<Button
 									variant="outlined"
 									color="neutral"
@@ -337,15 +356,6 @@ export default function Prompt() {
 						))}
 						</FixedSizeList>
 					</Stack>
-				</Box>
-				<Box>
-					{contexts.map(item => (
-						<Stack>
-							<ListItem>
-								Val: {item.value} ID: {item.id}
-							</ListItem>
-						</Stack>
-					))}
 				</Box>
 			</Box>
 		</Box>
